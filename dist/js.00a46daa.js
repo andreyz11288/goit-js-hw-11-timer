@@ -118,58 +118,79 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   return newRequire;
 })({"js/index.js":[function(require,module,exports) {
-// import Markup from '../handlebars/hendel.hbs'
-var body = document.querySelector('body'); //     body.innerHTML = `<div class="timer" id="timer-1">
-//     <div class="field">
-//         <span class="value" data-value="days">${days}</span>
-//         <span class="label">Days</span>
-//     </div>
-//     <div class="field">
-//         <span class="value" data-value="hours">${hours}</span>
-//         <span class="label">Hours</span>
-//     </div>
-//     <div class="field">
-//         <span class="value" data-value="mins">${mins}</span>
-//         <span class="label">Minutes</span>
-//     </div>
-//     <div class="field">
-//         <span class="value" data-value="secs">${secs}</span>
-//         <span class="label">Seconds</span>
-//     </div>
-// </div>`
-// new CountdownTimer({
-//   selector: '#timer-1',
-//   targetDate: new Date('Jul 17, 2019'),
-// });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var targetDate = new Date('Jul 17, 2021');
-console.log(targetDate);
-var startTime = Date.now();
-setInterval(function () {
-  var currentTime = Date.now();
-  var time = targetDate.getTime() - currentTime;
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  var _component = component(time),
-      days = _component.days,
-      hours = _component.hours,
-      mins = _component.mins,
-      secs = _component.secs;
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-  body.innerHTML = "<div class=\"timer\" id=\"timer-1\">\n    <div class=\"field\">\n        <span class=\"value\" data-value=\"days\">".concat(days, "</span>\n        <span class=\"label\">Days</span>\n    </div>\n\n    <div class=\"field\">\n        <span class=\"value\" data-value=\"hours\">").concat(hours, "</span>\n        <span class=\"label\">Hours</span>\n    </div>\n\n    <div class=\"field\">\n        <span class=\"value\" data-value=\"mins\">").concat(mins, "</span>\n        <span class=\"label\">Minutes</span>\n    </div>\n\n    <div class=\"field\">\n        <span class=\"value\" data-value=\"secs\">").concat(secs, "</span>\n        <span class=\"label\">Seconds</span>\n    </div>\n</div>");
-}, 1000);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-function component(time) {
-  var days = Math.floor(time / (1000 * 60 * 60 * 24));
-  var hours = Math.floor(time % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
-  var mins = Math.floor(time % (1000 * 60 * 60) / (1000 * 60));
-  var secs = Math.floor(time % (1000 * 60) / 1000);
-  return {
-    days: days,
-    hours: hours,
-    mins: mins,
-    secs: secs
-  };
-}
+var refs = {
+  days: document.querySelector('.value[data-value="days"]'),
+  hours: document.querySelector('.value[data-value="hours"]'),
+  mins: document.querySelector('.value[data-value="mins"]'),
+  secs: document.querySelector('.value[data-value="secs"]'),
+  timer: document.getElementById("timer-1")
+};
+
+var CountdownTimer = /*#__PURE__*/function () {
+  function CountdownTimer(_ref) {
+    var _this = this;
+
+    var targetDate = _ref.targetDate,
+        selector = _ref.selector;
+
+    _classCallCheck(this, CountdownTimer);
+
+    _defineProperty(this, "intervalId", setInterval(function () {
+      var currentTime = Date.now();
+      var deltaTime = _this.targetDate - currentTime; // const { days, hours, mins, secs } = component(deltaTime);
+
+      _this.component(deltaTime);
+
+      _this.timeFinish(deltaTime);
+    }, 1000));
+
+    this.targetDate = targetDate;
+    this.selector = selector;
+  }
+
+  _createClass(CountdownTimer, [{
+    key: "component",
+    value: function component(deltaTime) {
+      var days = this.pad(Math.floor(deltaTime / (1000 * 60 * 60 * 24)));
+      var hours = this.pad(Math.floor(deltaTime % (1000 * 60 * 60 * 24) / (1000 * 60 * 60)));
+      var mins = this.pad(Math.floor(deltaTime % (1000 * 60 * 60) / (1000 * 60)));
+      var secs = this.pad(Math.floor(deltaTime % (1000 * 60) / 1000));
+      refs.days.textContent = "".concat(days);
+      refs.hours.textContent = "".concat(hours);
+      refs.mins.textContent = "".concat(mins);
+      refs.secs.textContent = "".concat(secs);
+    }
+  }, {
+    key: "pad",
+    value: function pad(value) {
+      return String(value).padStart(2, '0');
+    }
+  }, {
+    key: "timeFinish",
+    value: function timeFinish(deltaTime) {
+      if (deltaTime < 0) {
+        clearInterval(this.intervalId);
+        refs.timer.textContent = "The End";
+      }
+    }
+  }]);
+
+  return CountdownTimer;
+}();
+
+refs.timer.setAttribute("style", "text-align: center; padding-top: 25%; font-size: 40px; ");
+new CountdownTimer({
+  selector: '#timer-1',
+  targetDate: new Date('Jul 17, 2021')
+});
 },{}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -198,7 +219,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49328" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "46655" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

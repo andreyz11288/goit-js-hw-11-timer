@@ -1,57 +1,75 @@
-Плагин ожидает следующую HTML-разметку и показывает четыре цифры: дни, часы, минуты и секунды в формате XX:XX:XX:XX. Количество дней может состоять из более чем двух цифр.
 
-<div class="timer" id="timer-1">
-  <div class="field">
-    <span class="value" data-value="days">11</span>
-    <span class="label">Days</span>
-  </div>
+const refs = {
+  startBtn: document.querySelector('button[data-action-start]'),
+  stopBtn: document.querySelector('button[data-action-stop]'),
+  clockface: document.querySelector('.js-clockface'),
+};
 
-  <div class="field">
-    <span class="value" data-value="hours">11</span>
-    <span class="label">Hours</span>
-  </div>
+class Timer {
+  constructor({ onTick }) {
+    this.intervalId = null;   
+    this.onTick = onTick;
+    this.init();
+  }
 
-  <div class="field">
-    <span class="value" data-value="mins">11</span>
-    <span class="label">Minutes</span>
-  </div>
+  init() {
+    const time = this.getTimeComponents(0);
+    this.onTick(time);
+  }
 
-  <div class="field">
-    <span class="value" data-value="secs">11</span>
-    <span class="label">Seconds</span>
-  </div>
-</div>
+  start() {
+    if (this.isActive) {
+      return;
+    }
 
-Плагин это класс CountdownTimer, экземпляр которого создает новый таймер с настройками.
+    const startTime = Date.now();
+    this.isActive = true;
+intervalId = 
+    this.setInterval(() => {
+      const currentTime = Date.now();
+      const deltaTime = currentTime - startTime;
+      const time = this.getTimeComponents(deltaTime);
 
-new CountdownTimer({
-  selector: '#timer-1',
-  targetDate: new Date('Jul 17, 2019'),
+      this.onTick(time);
+    }, 1000);
+  }
+
+  stop() {
+    clearInterval(this.intervalId);
+    this.isActive = false;
+    const time = this.getTimeComponents(0);
+    this.onTick(time);
+  }
+
+  
+  getTimeComponents(time) {
+    const hours = this.pad(
+      Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+    );
+    const mins = this.pad(Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)));
+    const secs = this.pad(Math.floor((time % (1000 * 60)) / 1000));
+
+    return { hours, mins, secs };
+  }
+
+  
+  pad(value) {
+    return String(value).padStart(2, '0');
+  }
+}
+
+const timer = new Timer({
+  onTick: updateClockface,
 });
 
-Для подсчета значений используй следующие готовые формулы, где time - разница между targetDate и текущей датой.
+refs.startBtn.addEventListener('click', timer.start.bind(timer));
+refs.stopBtn.addEventListener('click', timer.stop.bind(timer));
 
 /*
- * Оставшиеся дни: делим значение UTC на 1000 * 60 * 60 * 24, количество
- * миллисекунд в одном дне (миллисекунды * секунды * минуты * часы)
+ * - Принимает время в миллисекундах
+ * - Высчитывает сколько в них вмещается часов/минут/секунд
+ * - Рисует интерфейс
  */
-const days = Math.floor(time / (1000 * 60 * 60 * 24));
-
-/*
- * Оставшиеся часы: получаем остаток от предыдущего расчета с помощью оператора
- * остатка % и делим его на количество миллисекунд в одном часе
- * (1000 * 60 * 60 = миллисекунды * минуты * секунды)
- */
-const hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-/*
- * Оставшиеся минуты: получаем оставшиеся минуты и делим их на количество
- * миллисекунд в одной минуте (1000 * 60 = миллисекунды * секунды)
- */
-const mins = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
-
-/*
- * Оставшиеся секунды: получаем оставшиеся секунды и делим их на количество
- * миллисекунд в одной секунде (1000)
- */
-const secs = Math.floor((time % (1000 * 60)) / 1000);
+function updateClockface({ hours, mins, secs }) {
+  refs.clockface.textContent = `${hours}:${mins}:${secs}`;
+}
